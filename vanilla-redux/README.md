@@ -14,3 +14,8 @@
 - data를 변경하는 **함수**
 - return 값이 app의 data가 됨
 - 하나의 reducer에 하나의 data
+
+## 2. Actions
+
+- reducer의 두 번째 파라미터
+- store의 dispatch 메서드를 사용하여 action을 보냄 (action은 Object 형태여야 함)
