@@ -18,9 +18,12 @@
 ## 2. Actions
 
 - reducer의 두 번째 파라미터 혹은 아규먼트
-- store의 dispatch 메서드를 사용하여 action을 보냄 (action은 Object 형태여야 함)
+- store의 dispatch 메서드를 사용하여 reducer를 불러서 state와 action을 보냄
+  - action은 Object 형태여야 함
+  - 반드시 type 프로퍼티로 정의
 
 ## 3. Subscriptions
 
+- store의 변화를 감지하고 싶을 때 사용
 - store의 subscribe 메서드를 사용
 - store 안에 있는 변화가 있을 때 subscribe의 아규먼트로 입력한 함수가 실행됨
