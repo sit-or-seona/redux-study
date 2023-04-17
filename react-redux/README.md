@@ -22,10 +22,16 @@
 
 ### 2. mapDispatchToProps
 
+- dispatch하는 함수를 만들고 컴포넌트에 prop으로 전달
+- 컴포넌트로부터 store의 reducer에게 dispatch함
+
+  ```js
+  function mapDispatchToProps(dispatch, ownProps) {}
+  ```
+
 - mapState는 필요하지 않고 dispatch만 필요한 경우, null 할당
   ```js
   export default connect(null, mapDispatchToProps);
   ```
-- 컴포넌트로부터 store의 reducer에게 dispatch함
 
 => 위 2개의 함수로 컴포넌트에서 dispatch와 actionCreators를 처리
