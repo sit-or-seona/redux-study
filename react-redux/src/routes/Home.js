@@ -30,7 +30,7 @@ function Home({ toDos, addToDo }) {
 }
 
 function mapStateToProps(state) {
-  return { toDos: state };
+  return { toDos: JSON.parse(localStorage.getItem("toDos")) };
 }
 
 function mapDispatchToProps(dispatch) {
