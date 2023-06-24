@@ -1,7 +1,7 @@
 import React from "react";
 import { useRecoilState } from "recoil";
-import { todoListState } from "../../atoms";
-import { removeItemAtIndex, replaceItemAtIndex } from "../../utils/itemIndex";
+import { todoListState } from "../recoil_state";
+import { removeItemAtIndex, replaceItemAtIndex } from "../utils/itemIndex";
 
 export default function TodoItem({ item }) {
   const [todoList, setTodoList] = useRecoilState(todoListState);
