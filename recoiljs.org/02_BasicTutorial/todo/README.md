@@ -48,3 +48,59 @@
   ```js
   const [todoList, setTodoList] = useRecoilState(todoListState);
   ```
+
+## Selectors
+
+### Selector
+
+- 파생된 state(derived state)의 일부를 나타냄
+  - derived state: 순수함수를 통해 업데이트한 state의 결과물
+- 다른 데이터에 의존하는 동적인 데이터를 생성 가능
+
+### todoList의 derived state
+
+- 필터링된 todoList: 전체 todoList에서 일부 기준에 따라 필터링된 새 todoList를 생성하여 파생
+
+  ```js
+  const filteredTodoListState = selector({
+    key: "filteredTodoListState",
+    get: ({ get }) => {
+      const filter = get(todoListFilterState);
+      const list = get(todoListState);
+
+      switch (filter) {
+        case "Show Completed":
+          return list.filter((item) => item.isComplete);
+        case "Show Uncompleted":
+          return list.filter((item) => !item.isComplete);
+        default:
+          return list;
+      }
+    },
+  });
+  ```
+
+- todoList 통계: 전체 todoList에서 유용한 속성을 계산하여 파생
+
+  ```js
+  const todoListStatsState = selector({
+    key: "todoListStatsState",
+    get: ({ get }) => {
+      const todoList = get(todoListState);
+      const totalNum = todoList.length;
+      const totalCompletedNum = todoList.filter(
+        (item) => item.isComplete
+      ).length;
+      const totalUncompletedNum = totalNum - totalCompletedNum;
+      const percentCompleted =
+        totalNum === 0 ? 0 : totalCompletedNum / totalNum;
+
+      return {
+        totalNum,
+        totalCompletedNum,
+        totalUncompletedNum,
+        percentCompleted,
+      };
+    },
+  });
+  ```
