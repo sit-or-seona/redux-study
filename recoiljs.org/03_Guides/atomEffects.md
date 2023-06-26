@@ -70,3 +70,47 @@
     ],
   });
   ```
+
+### Compared to React Effects
+
+- 대부분의 경우 React의 `useEffect()`로 대체 가능
+- 차이점
+
+  - atom은 React context의 외부에서 생성됨
+  - 동적으로 생성된 atom의 경우 React 컴포넌트 내에서 Effects를 관리하기 어려울 수 있음
+  - atom 값을 초기화하거나 SSR과 함께 사용 불가
+
+- atom effects를 사용하면 effects와 atom 정의를 함께 배치
+
+  ```js
+  const myState = atom({ key: "Key", default: null });
+
+  function MyStateEffect(): React.Node {
+    const [value, setValue] = useRecoilState(myState);
+    useEffect(() => {
+      // Called when the atom value changes
+      store.set(value);
+      store.onChange(setValue);
+      return () => {
+        store.onChange(null);
+      }; // Cleanup effect
+    }, [value]);
+    return null;
+  }
+
+  function MyApp(): React.Node {
+    return (
+      <div>
+        <MyStateEffect />
+        ...
+      </div>
+    );
+  }
+  ```
+
+### Compared to Snapshots
+
+- `Snapshot hooks` API도 atom 상태 변화를 감시 가능
+- `<RecoilRoot>`의 `initializeState` prop은 초기 렌더링을 위한 값을 초기화 가능
+- 그러나 모든 상태 변화를 모니터링하고 동적 atom(특히 atom family)를 관리하는 데 어울리지 않음
+- Atom Effects를 사용하면 atom 정의와 함께 atom 별로 side-effects 정의가 가능하며 여러 정책들을 쉽게 작성 가능
