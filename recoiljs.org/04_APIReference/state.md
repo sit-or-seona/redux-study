@@ -16,7 +16,7 @@ function atom<T>({
 }): RecoilState<T>
 ```
 
-### 옵션
+### 속성
 
 - key
   - 내부적으로 atom을 식별하는데 사용되는 고유한 문자열
@@ -30,7 +30,7 @@ function atom<T>({
 - effects
   - Atom Effects의 배열 (optianal)
 - dangerouslyAllowMutability
-  - 몇몇 상황에서 atoms에 저장된 객체를 mutating하는 걸 허용 (state 변화 X)
+  - 몇몇 상황에서 atoms에 저장된 객체를 mutating하는 걸 허용하기 위해 사용 (state 변화 X)
   - 개발 환경에서 freezing 객체를 오버라이딩하기 위해 사용하는 옵션
 
 ### 가장 많이 사용되는 Hooks
@@ -73,3 +73,73 @@ function Counter() {
   );
 }
 ```
+
+## selector(options)
+
+- 함수나 파생된 state
+- 항상 동일한 값을 반환하는 **순수함수**
+- `get` 함수만 제공될 경우: 읽기만 가능한 `RecoilValueReadOnly` 객체를 반환
+- `set` 함수도 제공될 경우: 쓰기 가능한 `RecoilState` 객체를 반환
+
+  ```js
+  function selector<T>({
+  key: string,
+
+  get: ({
+    get: GetRecoilValue
+  }) => T | Promise<T> | RecoilValue<T>,
+
+  set?: (
+    {
+      get: GetRecoilValue,
+      set: SetRecoilState,
+      reset: ResetRecoilState,
+    },
+    newValue: T | DefaultValue,
+  ) => void,
+
+  dangerouslyAllowMutability?: boolean,
+  })
+  ```
+
+  ```js
+  type ValueOrUpdater<T> =
+    | T
+    | DefaultValue
+    | ((prevValue: T) => T | DefaultValue);
+  type GetRecoilValue = <T>(RecoilValue<T>) => T;
+  type SetRecoilState = <T>(RecoilState<T>, ValueOrUpdater<T>) => void;
+  type ResetRecoilState = <T>(RecoilState<T>) => void;
+  ```
+
+### 속성
+
+- key
+  - 내부적으로 atom을 식별하는데 사용되는 고유한 문자열
+  - 어플리케이션 전체에서 고유해야 함
+- get
+  - 파생된 state의 값을 평가하는 함수
+  - 값을 직접 반환하거나 비동기적인 `Promise`나 같은 타입의 다른 atoms/selectors를 반환 가능
+  - 첫 번째 파라미터로 `get`을 포함한 객체를 전달
+    - `get`
+      - 다른 atoms/selectors에서 값을 찾는데 사용되는 함수
+      - 이 함수에 전달되는 모든 atoms/selectors는 selector의 dependencies에 추가됨
+    - `getCallback`
+      - 콜백 인터페이스로 Recoil-aware 콜백을 생성하는 함수
+- set?
+  - set 프로퍼티를 작성할 경우, selector는 쓰기 가능한 state를 반환
+  - 첫 번째 파라미터로 콜백 객체와 새 입력 값(새 입력 값의 타입: 제네릭 또는 DefaultValue의 타입)
+  - 콜백 객체가 포함하는 값
+    - `get`
+      - 다른 atoms/selectors에서 값을 찾는데 사용되는 함수
+      - 이 함수는 selector를 주어진 atoms/selectors에 등록하지 않음
+    - `set`
+      - 상위 Recoil state의 값을 설정하는데 사용되는 함수
+      - 첫 번째 파라미터는 Recoil state, 두 번째 파라미터는 새 값
+        - 새 값: 업데이터 함수이거나 초기화하기 위한 `DefaultValue`객체
+    - `reset`
+      - 상위의 Recoil state를 default 값으로 초기화하는데 사용되는 함수
+      - 유일한 파라미터는 Recoil state
+- `dangerouslyAllowMutability`
+  - 몇몇 상황에서 atoms에 저장된 객체를 mutating하는 걸 허용하기 위해 사용 (state 변화 X)
+  - 개발 환경에서 freezing 객체를 오버라이딩하기 위해 사용하는 옵션
