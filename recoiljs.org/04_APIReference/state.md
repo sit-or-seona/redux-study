@@ -143,3 +143,36 @@ function Counter() {
 - `dangerouslyAllowMutability`
   - 몇몇 상황에서 atoms에 저장된 객체를 mutating하는 걸 허용하기 위해 사용 (state 변화 X)
   - 개발 환경에서 freezing 객체를 오버라이딩하기 위해 사용하는 옵션
+
+### Simple Static Dependencies (정적 의존성)
+
+```js
+const mySelector = selector({
+  key: "MySelector",
+  get: ({ get }) => get(myAtom) * 100,
+});
+```
+
+### Dynamic Dependencies (동적 의존성)
+
+- read-only selector는 dependencies를 기준으로 selector의 값을 평가하는 `get` 메서드를 가짐
+- dependencies 중 업데이트되는 값이 있다면 selector는 재평가
+- selector를 평가할 때 dependencies는 실제 사용되는 atoms/selectors를 기준으로 동적으로 결정됨
+- 이전 dependencies 값에 따라 다른 추가적인 dependencies를 동적으로 사용 가능
+- Recoil은 selector가 현재 업데이트된 dependencies만 등록하도록 현재 data-flow 그래프를 자동으로 업데이트
+
+```js
+const toggleState = atom({ key: "Toggle", default: false });
+
+const mySelector = selector({
+  key: "MySelector",
+  get: ({ get }) => {
+    const toggle = get(toggleState);
+    if (toggle) {
+      return get(selectorA);
+    } else {
+      return get(selectorB);
+    }
+  },
+});
+```
