@@ -176,3 +176,28 @@ const mySelector = selector({
   },
 });
 ```
+
+### Writeable Selector
+
+- 양방향 selector는 입력값을 파라미터로 받고, 이 파라미터를 사용해 data-flow 그래프 상의 상위로 변경 사항을 전파 가능
+- 사용자가 selector를 새 값으로 설정하거나 재설정할 수 있기 때문에 입력값은 selector의 타입과 같거나 재설정하는 `DefaultValue` 객체
+- 아래 코드에서 설정&재설정 작업을 통해 상위 atom으로 전달
+
+```js
+const proxySelector = selector({
+  key: "ProxySelector",
+  get: ({ get }) => ({ ...get(myAtom), extraField: "hi" }),
+  set: ({ set }, newValue) => set(myAtom, newValue),
+});
+```
+
+- 이 selector는 데이터를 변환하므로 입력값이 `DefaultValue`인지 확인
+
+```js
+const transformSelector = selector({
+  key: "TransformSelector",
+  get: ({ get }) => get(myAtom) * 100,
+  set: ({ set }, newValue) =>
+    set(myAtom, newValue instanceof DefaultValue ? newValue : newValue / 100),
+});
+```
