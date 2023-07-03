@@ -231,3 +231,52 @@ function ResultsSection() {
   );
 }
 ```
+
+## class Lodable
+
+- `Lodable` 객체는 Recoil atom 또는 selector의 최신 상태를 나타냄
+- 사용가능한 값을 가지고 있거나, 에러 상태이거나, 비동기 pending 상태일 수 있음
+
+### Lodable Interface
+
+- state
+  - atom 또는 selector의 최신 상태
+  - 가능한 값: `hasValue`, `hasError`, `loading`
+- contents
+  - `Lodable`로 표시되는 값
+  - state가 `hasValue`일 경우: 실제 값
+  - state가 `hasError`일 경우: Error 객체
+  - state가 `loading`일 경우: 값의 `Promise` (`toPromise()`를 사용해 `Promise`를 얻을 수 있음)
+
+### Lodable Methods (해당 API는 아직 불안정)
+
+- getValue
+  - React Suspense와 Recoil selectors의 시맨틱에 매치되는 값에 접근하기 위한 메서드
+  - state가 값을 가지고 있다면 값을 리턴, error를 가지고 있다면 error, pending 상태라면 실행을 연기하거나 보류 중인 상태를 전파하기 위해 리렌더링
+- toPromise
+  - selector가 revolve되면 revolve될 `Promise`를 반환
+  - selector가 동기적이거나 이미 revolve된 상태라면 즉시 반환
+- valueMaybe
+  - 가능한 경우 값을 반환하고, 그렇지 않으면 `undefined`를 반환
+- valueOrThrow
+  - 가능한 경우 값을 반환하고, 그렇지 않으면 Error
+- map(callback)
+  - Lodable의 값을 바꾸는 함수를 받아서 바뀐 값과 함께 새로운 `Lodable`을 반환
+  - 콜백함수는 파라미터로 부모 Lodable의 값을 받고 새 Lodable을 위한 새 값을 반환
+  - errors와 suspense도 전파 가능
+  - 콜백함수는 새 값뿐 아니라 새 값의 `Promise`, `Lodable`이나 Error도 반환 가능
+  - `Promise`의 경우, `.then()`과 유사
+
+```js
+function UserInfo({ userID }) {
+  const userNameLoadable = useRecoilValueLoadable(userNameQuery(userID));
+  switch (userNameLoadable.state) {
+    case "hasValue":
+      return <div>{userNameLoadable.contents}</div>;
+    case "loading":
+      return <div>Loading...</div>;
+    case "hasError":
+      throw userNameLoadable.contents;
+  }
+}
+```
