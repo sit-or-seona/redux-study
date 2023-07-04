@@ -358,3 +358,47 @@ function TempCelsius() {
   );
 }
 ```
+
+# useRecoilValue(state)
+
+- 주어진 Recoil state의 값을 반환하는 훅
+- React 컴포넌트에서 사용하면 state가 업데이트 되었을 때 리렌더링 하도록 컴포넌트를 구독
+- 읽기전용 state와 쓰기가능한 state에서 모두 동작하기 때문에 컴포넌트가 state를 읽기만 할 때 사용을 추천
+
+```js
+function useRecoilValue<T>(state: RecoilValue<T>): T;
+```
+
+### 아규먼트
+
+- state
+  - atom 또는 selector
+
+### 예시
+
+```js
+import { atom, selector, useRecoilValue } from "recoil";
+
+const namesState = atom({
+  key: "namesState",
+  default: ["", "Ella", "Chris", "", "Paul"],
+});
+
+const filteredNamesState = selector({
+  key: "filteredNamesState",
+  get: ({ get }) => get(namesState).filter((str) => str !== ""),
+});
+
+function NameDisplay() {
+  const names = useRecoilValue(namesState);
+  const filteredNames = useRecoilValue(filteredNamesState);
+
+  return (
+    <>
+      Original names: {names.join(",")}
+      <br />
+      Filtered names: {filteredNames.join(",")}
+    </>
+  );
+}
+```
