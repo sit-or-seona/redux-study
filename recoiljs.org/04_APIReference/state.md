@@ -1,6 +1,8 @@
 # API Reference - State
 
-## atom(options)
+<br>
+
+# atom(options)
 
 - Recoil의 state를 표현
 - writable한 `RecoilState` 객체를 반환
@@ -52,6 +54,8 @@ function atom<T>({
 - **Promise는 가변적**
 - atom을 (순수)함수로 설정 가능하지만 setters의 업데이터 폼을 사용해야 할 수 있음 (ex. `set(myAtom, () => myFunc)`)
 
+### 예시
+
 ```js
 import { atom, useRecoilState } from "recoil";
 
@@ -74,7 +78,13 @@ function Counter() {
 }
 ```
 
-## selector(options)
+<br>
+
+---
+
+<br>
+
+# selector(options)
 
 - 함수나 파생된 state
 - 항상 동일한 값을 반환하는 **순수함수**
@@ -232,7 +242,13 @@ function ResultsSection() {
 }
 ```
 
-## class Lodable
+<br>
+
+---
+
+<br>
+
+# class Lodable
 
 - `Lodable` 객체는 Recoil atom 또는 selector의 최신 상태를 나타냄
 - 사용가능한 값을 가지고 있거나, 에러 상태이거나, 비동기 pending 상태일 수 있음
@@ -278,5 +294,67 @@ function UserInfo({ userID }) {
     case "hasError":
       throw userNameLoadable.contents;
   }
+}
+```
+
+<br>
+
+---
+
+<br>
+
+# useRecoilState(state)
+
+- 첫 번째 요소는 state 값, 두 번째 요소는 state를 업데이트하는 setter 함수가 담긴 튜플을 반환하는 훅
+- React 컴포넌트에서 사용하면 state가 업데이트 되었을 때 리렌더링 하도록 컴포넌트를 구독
+- default value 대신 Recoil state를 아규먼트로 받는 것 외엔 React의 `useState()`와 유사
+
+```js
+function useRecoilState<T>(state: RecoilState<T>): [T, SetterOrUpdater<T>];
+
+type SetterOrUpdater<T> = (T | (T => T)) => void;
+
+```
+
+### 아규먼트
+
+- state
+  - atom 또는 쓰기가능한 selector
+  - 쓰기가능한 selectors: `get`과 `set`을 가지고 있는 selector
+
+### 예시
+
+```js
+import { atom, selector, useRecoilState } from "recoil";
+
+const tempFahrenheit = atom({
+  key: "tempFahrenheit",
+  default: 32,
+});
+
+const tempCelsius = selector({
+  key: "tempCelsius",
+  get: ({ get }) => ((get(tempFahrenheit) - 32) * 5) / 9,
+  set: ({ set }, newValue) => set(tempFahrenheit, (newValue * 9) / 5 + 32),
+});
+
+function TempCelsius() {
+  const [tempF, setTempF] = useRecoilState(tempFahrenheit);
+  const [tempC, setTempC] = useRecoilState(tempCelsius);
+
+  const addTenCelsius = () => setTempC(tempC + 10);
+  const addTenFahrenheit = () => setTempF(tempF + 10);
+
+  return (
+    <div>
+      Temp (Celsius): {tempC}
+      <br />
+      Temp (Fahrenheit): {tempF}
+      <br />
+      <button onClick={addTenCelsius}>Add 10 Celsius</button>
+      <br />
+      <button onClick={addTenFahrenheit}>Add 10 Fahrenheit</button>
+    </div>
+  );
 }
 ```
