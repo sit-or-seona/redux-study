@@ -402,3 +402,58 @@ function NameDisplay() {
   );
 }
 ```
+
+# useSetRecoilState(state)
+
+- 쓰기가능한 Recoil state의 값을 업데이트하기 위한 setter 함수를 반환하는 훅
+- state를 변경하기 위해 비동기로 사용될 수 있는 setter 함수를 반환
+- setter는 새로운 값이나 이전 값을 아규먼트로 받는 updater 함수를 전달
+- 컴포넌트가 state를 읽지 않고 쓰기만 할 때 추천
+- 컴포넌트가 setter를 가져오기 위해 `useRecoilState()`를 사용할 경우, 업데이트를 구독하고 atom/selector가 업데이트되면 리렌더링
+- `useSetRecoilState()`를 사용하면 컴포넌트를 구독하지 않고도 컴포넌트가 값을 설정할 수 있도록 함
+
+```js
+function useSetRecoilState<T>(state: RecoilState<T>): SetterOrUpdater<T>;
+
+type SetterOrUpdater<T> = (T | (T => T)) => void;
+```
+
+### 아규먼트
+
+- state
+  - 쓰기가능한 Recoil state (atom 또는 쓰기가능한 selector)
+
+### 예시
+
+```js
+import { atom, useSetRecoilState } from "recoil";
+
+const namesState = atom({
+  key: "namesState",
+  default: ["Ella", "Chris", "Paul"],
+});
+
+function FormContent({ setNamesState }) {
+  const [name, setName] = useState("");
+
+  return (
+    <>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <button onClick={() => setNamesState((names) => [...names, name])}>
+        Add Name
+      </button>
+    </>
+  );
+}
+
+// This component will be rendered once when mounting
+function Form() {
+  const setNamesState = useSetRecoilState(namesState);
+
+  return <FormContent setNamesState={setNamesState} />;
+}
+```
