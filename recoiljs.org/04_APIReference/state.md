@@ -457,3 +457,28 @@ function Form() {
   return <FormContent setNamesState={setNamesState} />;
 }
 ```
+
+# useResetRecoilState(state)
+
+- 주어진 state를 default 값으로 리셋하는 함수를 반환하는 훅
+- 컴포넌트를 구독하지 않고도 state를 리셋 가능
+
+```js
+function useResetRecoilState<T>(state: RecoilState<T>): () => void;
+```
+
+### 아규먼트
+
+- state
+  - 쓰기가능한 Recoil state
+
+### 예시
+
+```js
+import { todoListState } from "../atoms/todoListState";
+
+const TodoResetButton = () => {
+  const resetList = useResetRecoilState(todoListState);
+  return <button onClick={resetList}>Reset</button>;
+};
+```
