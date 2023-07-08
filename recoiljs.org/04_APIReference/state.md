@@ -359,6 +359,12 @@ function TempCelsius() {
 }
 ```
 
+<br>
+
+---
+
+<br>
+
 # useRecoilValue(state)
 
 - 주어진 Recoil state의 값을 반환하는 훅
@@ -402,6 +408,12 @@ function NameDisplay() {
   );
 }
 ```
+
+<br>
+
+---
+
+<br>
 
 # useSetRecoilState(state)
 
@@ -458,6 +470,12 @@ function Form() {
 }
 ```
 
+<br>
+
+---
+
+<br>
+
 # useResetRecoilState(state)
 
 - 주어진 state를 default 값으로 리셋하는 함수를 반환하는 훅
@@ -481,4 +499,55 @@ const TodoResetButton = () => {
   const resetList = useResetRecoilState(todoListState);
   return <button onClick={resetList}>Reset</button>;
 };
+```
+
+<br>
+
+---
+
+<br>
+
+# useRecoilStateLoadable(state)
+
+- 비동기 selector의 값을 읽기 위해 사용하는 훅
+- 암묵적으로 주어진 state에 컴포넌트를 구독
+- `useRecoilState()`와 달리 Error나 Promise를 던지지 않음
+- `Loadable` 객체를 setter 콜백함수와 함께 값으로 반환
+
+```js
+function useRecoilStateLoadable<T>(state: RecoilState<T>): [Loadable<T>, (T | (T => T)) => void]
+```
+
+### 아규먼트
+
+- state
+  - 비동기 작업이 있을 수 있는 쓰기가능한 atom 또는 selector
+  - 반환된 Loadable의 상태는 제공된 state selector의 상태에 따라 다름
+
+```
+* 아래의 인터페이스로 현재 state에 대한 `Loadable`을 반환
+  - state
+    - selector의 상태
+    - 가능한 값: `hasValue`, `hasError`, `loading`
+  - contents
+    - `Loadable`이 나타내는 값
+    - state가 `hasValue`면 실제 값, state가 `hasError`면 Error, state가 `loading`면 값의 `Promise`
+```
+
+### 예시
+
+```js
+function UserInfo({ userID }) {
+  const [userNameLoadable, setUserName] = useRecoilStateLoadable(
+    userNameQuery(userID)
+  );
+  switch (userNameLoadable.state) {
+    case "hasValue":
+      return <div>{userNameLoadable.contents}</div>;
+    case "loading":
+      return <div>Loading...</div>;
+    case "hasError":
+      throw userNameLoadable.contents;
+  }
+}
 ```
