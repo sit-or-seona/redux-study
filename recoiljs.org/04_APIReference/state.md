@@ -551,3 +551,46 @@ function UserInfo({ userID }) {
   }
 }
 ```
+
+# useRecoilValueLoadable(state)
+
+- 비동기 selector의 값을 읽기 위해 사용하는 훅
+- 주어진 state에 컴포넌트를 암묵적으로 구독
+- `useRecoilValue()`와 달리 비동기 selector에서 읽어올 때 Error 혹은 Promise를 던지지 않음
+- 값에 대한 `Loadable` 객체를 반환
+
+```js
+function useRecoilValueLoadable<T>(state: RecoilValue<T>): Loadable<T>
+```
+
+### 아규먼트
+
+- state
+  - 비동기 작업이 있을 수 있는 atom 또는 selector
+  - 반환된 loadable의 상태는 제공된 state selector의 상태에 따라 다름
+
+```
+* 아래의 인터페이스로 현재 state에 대한 `Loadable`을 반환
+  - state
+    - selector의 상태
+    - 가능한 값: `hasValue`, `hasError`, `loading`
+  - contents
+    - `Loadable`이 나타내는 값
+    - state가 `hasValue`면 실제 값, state가 `hasError`면 Error, state가 `loading`면 값의 `Promise`
+```
+
+### 예시
+
+```js
+function UserInfo({ userID }) {
+  const userNameLoadable = useRecoilValueLoadable(userNameQuery(userID));
+  switch (userNameLoadable.state) {
+    case "hasValue":
+      return <div>{userNameLoadable.contents}</div>;
+    case "loading":
+      return <div>Loading...</div>;
+    case "hasError":
+      throw userNameLoadable.contents;
+  }
+}
+```
