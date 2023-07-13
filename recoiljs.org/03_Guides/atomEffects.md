@@ -114,3 +114,53 @@
 - `<RecoilRoot>`의 `initializeState` prop은 초기 렌더링을 위한 값을 초기화 가능
 - 그러나 모든 상태 변화를 모니터링하고 동적 atom(특히 atom family)를 관리하는 데 어울리지 않음
 - Atom Effects를 사용하면 atom 정의와 함께 atom 별로 side-effects 정의가 가능하며 여러 정책들을 쉽게 작성 가능
+
+## Logging Example
+
+- Atom Effects를 사용해 특정 atom의 state 변화를 기록
+  ```js
+  const currentUserIDState = atom({
+    key: "CurrentUserID",
+    default: null,
+    effects: [
+      ({ onSet }) => {
+        onSet((newID) => {
+          console.debug("Current user ID:", newID);
+        });
+      },
+    ],
+  });
+  ```
+
+## History Example
+
+- Logging Example에서 더 복잡하게 변화 히스토리를 유지 가능
+- 특정 변화를 원상태로 되돌리는 콜백 핸들러를 사용해 state 변경 내역 queue를 유지하는 Effect를 제공
+
+  ```ts
+  const history: Array<{
+    label: string;
+    undo: () => void;
+  }> = [];
+
+  const historyEffect =
+    (name) =>
+    ({ setSelf, onSet }) => {
+      onSet((newValue, oldValue) => {
+        history.push({
+          label: `${name}: ${JSON.serialize(oldValue)} -> ${JSON.serialize(
+            newValue
+          )}`,
+          undo: () => {
+            setSelf(oldValue);
+          },
+        });
+      });
+    };
+
+  const userInfoState = atomFamily({
+    key: "UserInfo",
+    default: null,
+    effects: (userID) => [historyEffect(`${userID} user info`)],
+  });
+  ```
